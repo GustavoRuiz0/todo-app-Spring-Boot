@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.cyber.inter.internalizarworkflow.dtos.TaskRecordDto;
+import com.cyber.inter.internalizarworkflow.models.Message;
 import com.cyber.inter.internalizarworkflow.models.TaskModel;
 import com.cyber.inter.internalizarworkflow.repositories.TaskRepository;
 
@@ -22,6 +23,9 @@ import jakarta.validation.Valid;
 public class TaskService {
     @Autowired
     TaskRepository taskRepository;
+
+    @Autowired
+    private Message message;
 
     public ResponseEntity<List<TaskModel>> getAll(){
         return ResponseEntity.status(HttpStatus.OK).body(taskRepository.findAll());
@@ -38,13 +42,15 @@ public class TaskService {
         Optional<TaskModel> taskO = taskRepository.findById(id);
 
         if(taskO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("TASK NOT FOUND");
+            message.setMessage("TASK NOT FOUND");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
 
+        message.setMessage("TASK COMPLETED");
         var taskModel = taskO.get();
         taskModel.setActive(false);
         taskRepository.save(taskModel);
-        return ResponseEntity.status(HttpStatus.OK).body("TASK COMPLETED");
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     public ResponseEntity<List<TaskModel>> getAllActives(){
@@ -58,7 +64,8 @@ public class TaskService {
         Optional<TaskModel> taskO = taskRepository.findByActiveTrueAndIdTask(id);
 
         if (!taskO.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task Not Found or is not active");
+            message.setMessage("Task Not Found or is not active");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
     
         return ResponseEntity.status(HttpStatus.OK).body(taskO.get());
@@ -74,7 +81,8 @@ public class TaskService {
         Optional<TaskModel> taskO = taskRepository.findByActiveFalseAndIdTask(id);
 
         if(!taskO.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task Not Found or Is Not Completed");
+            message.setMessage("Task Not Found or Is Not Completed");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
         
         return ResponseEntity.status(HttpStatus.OK).body(taskO.get());
@@ -84,11 +92,13 @@ public class TaskService {
         Optional<TaskModel> taskO = taskRepository.findById(id);
 
         if (!taskO.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task Not Found");
+            message.setMessage("Task Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
 
+        message.setMessage("Task Deleted");
         taskRepository.delete(taskO.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Task Deleted");
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
 }

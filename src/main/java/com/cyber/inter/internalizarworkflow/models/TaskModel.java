@@ -21,7 +21,7 @@ public class TaskModel implements Serializable{
 
     private String content;
 
-    @Column(name = "active")
+    @Column( name = "active")
     private boolean active;
 
     public static long getSerialversionuid() {
